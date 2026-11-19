@@ -1,5 +1,7 @@
 const express = require("express");
 const cors = require("cors");
+const fs = require("fs");
+const path = require("path");
 
 const app = express();
 const PORT = 3000;
@@ -63,7 +65,11 @@ app.get("/api/cartas", (req, res) => {
 });
 
 app.get("/cartas/aleatoria", (req, res) => {
-  const card = cards[Math.floor(Math.random() * cards.length)];
+  const cardsPath = path.join(__dirname, "cartas.json");
+
+const cards = JSON.parse(
+  fs.readFileSync(cardsPath, "utf8")
+);
 
   res.send(page(
     "Carta à sorte",
@@ -85,6 +91,11 @@ app.post("/api/cartas", (req, res) => {
   const card = req.body;
 
   cards.push(card);
+
+  fs.writeFileSync(
+    cardsPath,
+    JSON.stringify(cards, null, 2)
+  );
 
   res.status(201).json(card);
 });
