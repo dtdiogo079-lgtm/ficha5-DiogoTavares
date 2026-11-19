@@ -1,7 +1,6 @@
+
 import { useState, useEffect } from "react";
 import Card from "./Card.jsx";
-
-
 
 function App() {
   const [filter, setFilter] = useState("Todas");
@@ -11,10 +10,11 @@ function App() {
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
   const [name, setName] = useState("");
   const [type, setType] = useState("Criatura");
   const [attack, setAttack] = useState("");
-  
+  const [formError, setFormError] = useState("");
 
   useEffect(() => {
     fetch("http://localhost:3000/api/cartas")
@@ -22,7 +22,6 @@ function App() {
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`);
         }
-
         return res.json();
       })
       .then((data) => setCards(data))
@@ -32,83 +31,91 @@ function App() {
 
   let visible = cards
     .filter((card) => filter === "Todas" || card.type === filter)
-    .filter((card) => card.name.toLowerCase().includes(search.toLowerCase()));
+    .filter((card) =>
+      card.name.toLowerCase().includes(search.toLowerCase())
+    );
 
   if (sorted) {
     visible = [...visible].sort((a, b) => b.attack - a.attack);
   }
 
   function pickRandom() {
+    if (cards.length === 0) return;
     setRandomCard(cards[Math.floor(Math.random() * cards.length)]);
   }
-  
- async function handleSubmit(e) {
-  e.preventDefault();
 
-  const card = {
-    name: name,
-    type: type,
-    attack: Number(attack),
-    defense: 0
-  };
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setFormError("");
 
-  try {
-    const response = await fetch("http://localhost:3000/api/cartas", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(card)
-    });
+    const card = {
+      name: name,
+      type: type,
+      attack: Number(attack),
+      defense: 0
+    };
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+    try {
+      const response = await fetch("http://localhost:3000/api/cartas", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(card)
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(`HTTP ${response.status}: ${data.error}`);
+      }
+
+      const newCard = await response.json();
+
+      setCards((previousCards) => [...previousCards, newCard]);
+      setName("");
+      setType("Criatura");
+      setAttack("");
+    } catch (error) {
+      setFormError(error.message);
     }
-
-    const newCard = await response.json();
-
-    setCards([...cards, newCard]);
-    setName("");
-    setType("Criatura");
-    setAttack("");
-  } catch (error) {
-    console.error(error);
   }
-}
-
 
   return (
     <main>
       <h1>A minha coleção</h1>
-<h2>Adicionar carta</h2>
 
-<form onSubmit={handleSubmit}>
-  <input
-    value={name}
-    onChange={(e) => setName(e.target.value)}
-    placeholder="Nome da carta"
-    required
-  />
+      <h2>Adicionar carta</h2>
 
-  <select
-    value={type}
-    onChange={(e) => setType(e.target.value)}
-  >
-    <option value="Criatura">Criatura</option>
-    <option value="Feitiço">Feitiço</option>
-    <option value="Estrutura">Estrutura</option>
-  </select>
+      <form onSubmit={handleSubmit}>
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Nome da carta"
+          required
+        />
 
-  <input
-    type="number"
-    value={attack}
-    onChange={(e) => setAttack(e.target.value)}
-    placeholder="Ataque"
-    required
-  />
+        <select
+          value={type}
+          onChange={(e) => setType(e.target.value)}
+        >
+          <option value="Criatura">Criatura</option>
+          <option value="Feitiço">Feitiço</option>
+          <option value="Estrutura">Estrutura</option>
+        </select>
 
-  <button type="submit">Adicionar carta</button>
-</form>
+        <input
+          type="number"
+          value={attack}
+          onChange={(e) => setAttack(e.target.value)}
+          placeholder="Ataque"
+          required
+        />
+
+        <button type="submit">Adicionar carta</button>
+      </form>
+
+      {formError && <p>Erro: {formError}</p>}
+
       <p>
         Tenho {cards.length} cartas · a mostrar {visible.length}
       </p>
@@ -144,6 +151,7 @@ function App() {
 
       <h2>Carta à sorte</h2>
       <button onClick={pickRandom}>Escolher outra</button>
+
       {randomCard && (
         <p>
           <b>{randomCard.name}</b> — {randomCard.type} · ataque {randomCard.attack} ·
