@@ -42,7 +42,7 @@ function App() {
     setRandomCard(cards[Math.floor(Math.random() * cards.length)]);
   }
   
-  function handleSubmit(e) {
+ async function handleSubmit(e) {
   e.preventDefault();
 
   const card = {
@@ -52,13 +52,29 @@ function App() {
     defense: 0
   };
 
-  setCards([...cards, card]);
+  try {
+    const response = await fetch("http://localhost:3000/api/cartas", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(card)
+    });
 
-  setName("");
-  setType("Criatura");
-  setAttack("");
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const newCard = await response.json();
+
+    setCards([...cards, newCard]);
+    setName("");
+    setType("Criatura");
+    setAttack("");
+  } catch (error) {
+    console.error(error);
+  }
 }
-
 
 
   return (
