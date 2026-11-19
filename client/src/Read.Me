@@ -1,0 +1,53 @@
+
+# A Minha Coleção de Cartas
+
+## Descrição
+Esta aplicação permite visualizar e gerir uma coleção de cartas.
+É possível adicionar cartas, pesquisar pelo nome, filtrar por tipo,
+ordenar pelo ataque e escolher uma carta aleatória.
+
+## Funcionalidades
+- Listar todas as cartas.
+- Adicionar novas cartas.
+- Pesquisar cartas pelo nome.
+- Filtrar por criaturas e feitiços.
+- Ordenar cartas pelo valor de ataque.
+- Escolher uma carta aleatória.
+- Guardar as cartas num ficheiro JSON.
+
+## Tecnologias utilizadas
+- React
+- JavaScript
+- HTML
+- CSS
+- Node.js
+- Express
+- CORS
+- JSON
+
+## API
+
+### GET /api/cartas
+- Método: GET
+- URL: http://localhost:3000/api/cartas
+- Recebe: Não recebe dados.
+- Resposta: Lista de todas as cartas (200 OK).
+
+### POST /api/cartas
+- Método: POST
+- URL: http://localhost:3000/api/cartas
+- Recebe: Uma carta em formato JSON com nome, tipo, ataque e defesa.
+- Resposta:
+  - 201 Created: Carta adicionada com sucesso.
+  - 400 Bad Request: Nome ou tipo inválido ou em falta.
+
+## Pergunta 3
+
+Quando adicionamos uma carta, o navegador envia primeiro um pedido OPTIONS (preflight), antes do POST. Este pedido é enviado automaticamente pelo browser para verificar se o servidor permite a comunicação entre origens diferentes. Sem a configuração CORS, o pedido OPTIONS não era autorizado e o POST não chegava a ser executado. Por isso, o console.log da rota POST não aparecia no terminal.
+
+## Pergunta 4
+
+Na primeira versão, usando apenas setCards, a carta ficava guardada no estado do React e desaparecia ao atualizar a página. Na segunda versão, com POST mas sem ficheiro, ficava guardada na memória do servidor e desaparecia quando este era reiniciado. Na versão final, com o ficheiro cartas.json, os dados ficam guardados e sobrevivem ao reinício da aplicação e do servidor.
+
+## Autor
+Projeto desenvolvido no âmbito do Módulo 5 — Redes de Comunicação.
